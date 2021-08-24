@@ -1,0 +1,88 @@
+#include<stdio.h>
+#include<string.h>
+
+void merge(char nameList[][31], int left, int mid, int right){
+	int n = right-left+1;
+	char nameTemp[n][31];
+	int i=left; int j = mid+1; int k = 0;
+	while(i<=mid && j<=right){
+		if(strcmp(nameList[i], nameList[j]) < 0)
+			strcpy(nameTemp[k++], nameList[i++]);
+		else
+			strcpy(nameTemp[k++], nameList[j++]);
+	}
+	while(i<=mid)
+		strcpy(nameTemp[k++], nameList[i++]);
+	while(j<=right)
+		strcpy(nameTemp[k++], nameList[j++]);
+	int ind=0;
+	for(i=left; i<=mid; i++)
+		strcpy(nameList[i++], nameTemp[ind++]);
+	for(j=mid+1; j<=right; j++)
+		strcpy(nameList[j++], nameTemp[ind++]);
+}
+
+
+void mergeSort(char nameList[][31], int left, int right){
+	if(left < right){
+		int mid = (left + (right - 1))/2;
+		mergeSort(nameList, left, mid);
+		mergeSort(nameList, mid+1, right);
+		merge(nameList, left, mid, right);
+	}
+}
+
+int binarySearchName(char nameList[][31], char nameSearch[31], int left, int right){
+	int mid = (left + right-1)/2;
+//	printf("%d\n", mid);
+	if(left <= right){
+		if(strcmp(nameList[mid], nameSearch) == 0) return mid; //kalo sama return index mid
+		if(strcmp(nameList[mid], nameSearch) < 0) return binarySearchName(nameList, nameSearch, mid+1, right); //find from right sub array
+		/*midnya dikurangi satu karena sudah dicek pas diawal
+		kalo dikirim lagi nanti kena cek terus"an*/
+		if(strcmp(nameList[mid], nameSearch) > 0) return binarySearchName(nameList, nameSearch, left, mid-1); //find from left sub array
+	}
+	return -1;
+}
+	
+
+
+int main(){
+	FILE *fptr;
+	fptr = fopen("searchName.in", "r");
+	if(fptr == NULL){
+		puts("File cannot be opened!");
+		return -1;
+	}
+	int t;
+	fscanf(fptr, "%d\n", &t);
+//	printf("%d\n", t);
+	int n, loc = -1;
+	for(int i=1; i<=t; i++){
+		fscanf(fptr, "%d\n", &n);
+//		printf("%d\n", n);
+		char nameList[n][31]; char nameSearch[31];
+		for(int j=0; j<n; j++){
+			fscanf(fptr, "%s\n", nameList[j]);
+//			printf("%s\n", nameList[j]);
+		}
+		fscanf(fptr, "%s\n", nameSearch);
+//		printf("%s\n", nameSearch);
+		mergeSort(nameList, 0, n-1);
+//		for(int j=0; j<n; j++){
+//			printf("%s\n", nameList[j]);
+//		}
+		loc = binarySearchName(nameList, nameSearch, 0, n);
+////		printf((loc == -1)? "Case #%d: %d\n", i, loc : "Case #%d: Not found\n", i);
+//		printf("%d\n", loc);
+		if(loc < 0){
+			printf("Case #%d: Not found\n", i);
+		}
+		else{
+			printf("Case #%d: %d\n", i, loc);
+		}
+		loc = -1;
+	}
+	fclose(fptr);
+	return 0;
+}
